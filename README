@@ -1,0 +1,246 @@
+Foreword
+========
+
+
+TuxGuardian is free software distributed under the GNU/GPL, which
+means that you can help too! If you want to join the development team,
+make a bug report or simply learn more about TuxGuardian, please refer
+to the following URL:
+
+http://tuxguardian.sourceforge.net
+
+This web site also has instructions on how to contact us.
+
+
+
+Requirements 
+============
+
+
+You need Linux kernel 2.6.12 or higher, compiled
+with LSM support.  To make sure you have LSM support, type
+
+$ cd /usr/src/<current-kernel-version> 
+$ make menuconfig
+
+
+Go to the 'Security options' section. The following options must be
+set:
+
+ENABLE DIFFERENT SECURITY MODELS 
+SOCKET AND NETWORKING SECURITY HOOKS
+
+The DEFAULT LINUX CAPABILITIES option can be checked, but only as a module (not compiled into the kernel).
+There is no need to set ROOT PLUG and NSA SELINUX SUPPORT options.
+
+If you decide to use TuxGuardian's graphical interface, you'll also
+need QT 3.1 or higher.
+
+
+You will need the following packages (names may differ from distro to distro):
+	kernel-source
+	kernel-headers
+	qt3-dev-tools
+	libqt3-headers
+	libqt3-mt-dev
+	gcc4 (depending on your system) 
+
+
+
+Introduction 
+============
+
+
+TuxGuardian is a three-layered firewall. This means that TuxGuardian
+was developed not as a single program, but as three applications that
+exchange data in order to implement the firewall's functionality.
+
+These three applications are:
+
+- The security module 
+- The daemon 
+- The frontend
+
+
+The security module is the "low level" part of TuxGuardian. It is like
+a spy that discovers when an application is trying to do something
+suspicious and then warns the daemon about it.
+
+The daemon is an userspace program that receives the module's warnings
+and checks if the application has permission to do whatever it is
+trying to do. The daemon knows this kind of stuff because of a
+configuration file called daemon.conf. After finding out if the
+application can access the Internet, the daemon responds to the
+module, who effectively allows or forbids the access.
+
+If the daemon does not know what to respond to the module, it can
+contact the frontend. The frontend is just a simple program that
+receives a message from the daemon and translates it into humans
+language. The frontend asks the user (typically through a graphical
+window) what he wants to do, and then responds to the daemon. Note
+that the frontend isn't really necessary: TuxGuardian is perfectly
+able to operate only with the static information written on
+daemon.conf.  
+
+
+How to install/uninstall
+========================
+
+The first thing to do is to download TuxGuardian's source code. Let's
+suppose the file has a name like tuxguardian-0.5.tar.gz:
+
+
+$ tar xvzf tuxguardian-0.5.tar.gz 
+$ cd tuxguardian-0.5/ 
+
+
+
+To compile and install everything: 
+$ su
+<enter root password>
+$ make 
+
+
+
+To uninstall: 
+
+$ su 
+<enter root password>
+$ make uninstall 
+
+All the binaries, with exception of the module's, are installed on
+/usr/local/bin. You can change this path by modifying the Makefile's
+variable 'bindir'.
+
+The security module is installed inside /lib/modules, and the exact
+subdirectory depends on your kernel version. You can find out the
+exact path where the module is going to be installed by typing:
+
+$ echo /lib/modules/$(uname -r)
+
+
+
+
+How to use
+==========
+
+
+In order to use TuxGuardian you must run the daemon and load the
+security module, both as superuser: 
+
+$ su
+<enter root password>
+$ tg-daemon
+$ modprobe tuxg
+
+If you have any problems loading the module with 'modprobe tuxg',
+make sure you don't have any other security modules loaded. If this
+is the case, try to run (as root) the following:
+
+$ modprobe -r capability
+
+
+If you want to use the graphical frontend (advised), run the following command, 
+still as the  superuser:
+
+$ tg-frontend
+
+Notice that since there are still no initialization/shutdown scripts
+that ensures the automatic loading/unloading of TuxGuardian you'll
+have to explicitly type the above commands.
+
+Besides that, you should note that all applications that uses
+Internet sockets at system initialization/shutdown (ie. iptables,
+ifconfig, named, etc), MUST have their permissions configured
+in daemon.conf (more on this on the following section). Otherwise when
+you initialize/shutdown your system the module will be loaded but the
+daemon will be either offline or unaware of the necessary security
+informations. If you don't want to configure these applications, 
+DO NOT FORGET to remove to module (modprobe -r tuxg) when
+shutting down your system.
+
+
+ Also notice that both the daemon and the frontend dump a
+messages on the screen, so you might want to close that console after
+these commands or redirect the output to a file.
+
+
+
+If you decided NOT the use the frontend
+=======================================
+
+
+We strongly advise you to run the graphical frontend. In this case, you'll be 
+warned be means of a graphical dialog every time a new application tries to 
+use the Internet.  When this dialog appears you can either click the OK or the 
+DENY button. If you decide to mark "Don't ask me again", your
+answer will be automatically stored in the configuration file.
+
+However, if you chose NOT to run the frontend,
+TuxGuardian's security informations will need to be manually configured. 
+
+To do so you must edit the daemon.conf file. For example:
+
+
+
+$ vi /etc/daemon.conf
+
+Now you must insert the rules in it. A rule is something like
+
+/bin/ping 
+e9cb6b3fc38d7d7973fe641922366bd7 
+PERMIT_APP
+
+or
+
+/usr/bin/ssh 
+4d44f576420beffd1a7d38166bb22331 
+PERMIT_APP PERMIT_SERVER
+
+The first line if the full application path. The second is the app's
+md5hash. You can obtain this hash by running
+
+$ md5sum <application-path>
+
+The third line correspond to the actual permissions. The currently
+supported permissions are:
+
+PERMIT_APP 
+DENY_APP
+
+and
+
+PERMIT_SERVER 
+DENY_SERVER
+
+PERMIT_APP and DENY_APP are usually used when you want to permit an
+application of running as a client (the application will be allowed to
+open connections to remote servers). On the other hand, if you set
+DENY_APP the program won't be able to allocate sockets. Be careful
+with this option: it will completely deny the application's access to
+the Internet.
+
+PERMIT_SERVER and DENY_SERVER are used to permit or stop programs of
+acting like a servers (that is, to receive connections from remote
+clients). Don't forget that a server must also have ordinary
+permissions to access the Internet, so if you PERMIT_SERVER some
+application you should also set PERMIT_APP. On the other hand, it
+might be prudent to set both DENY_SERVER and PERMIT_APP if the
+application is only a client, and never acts like a server.
+
+Finally, if you completely distrust some application, you should set
+both DENY_APP and DENY_SERVER.  
+
+
+
+
+Licence
+=======
+
+TuxGuardian is free software distributed under the GNU/GPL.  
+
+You can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation;
+either version 2 of the License, or (at your option) any later version.
+
+Please refer to the COPYING file for more information.

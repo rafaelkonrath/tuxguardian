@@ -1,0 +1,43 @@
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<class>Form3</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>Form3</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>165</width>
+            <height>49</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>TuxGuardian</string>
+    </property>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>textLabel1</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>50</x>
+                <y>10</y>
+                <width>60</width>
+                <height>20</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Running..</string>
+        </property>
+    </widget>
+</widget>
+<includes>
+    <include location="local" impldecl="in implementation">form2.ui.h</include>
+</includes>
+<functions>
+    <function access="private" specifier="non virtual">init()</function>
+</functions>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>
