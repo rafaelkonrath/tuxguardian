@@ -1,3 +1,31 @@
+TuxGuardian is a host firewall for GNU/Linux.
+
+TuxGuardian was developed after the observation that Linux security applications were not tailored for lay users. With TuxGuardian you'll be able to implement access control policies to the network resources in order to identify and control every application that tries to access the network.
+
+All this means that now you can make your machine secure by controlling and forbidding transmission and reception of data by unauthorized applications. Click here for a screenshot.
+TuxGuardian makes use of the latest security mechanisms included in the Linux kernel 2.6, such as the LSM framework, and is really simple to use (that's the intention!).
+
+TuxGuardian is free software distributed under the GNU GPL, which means that you can help too!.
+
+
+Features
+
+    Detects unauthorized applications trying to act like a client or a server;
+    Operates with or without user intervention;
+    Verifies the applications' integrity so that maliciously modified software won't be able to send or receive data through the network;
+    Uses a three-layered architecture of independent modules, which eases the task of addings new features and functionality;
+
+
+In what situations should I use TuxGuardian?
+
+    If you want to protect you computer against spywares, trojans and other evil pieces of software;
+    If you want to have an additional layer of protection working on a per-application basis, besides a packet-filtering firewall or other low level security mechanisms;
+    If you want to stop backdoors and rootkits which modify the expected behavior of your applications from accessing the network;
+    If you want to implement the internal security of your network (this is specially useful since ordinary firewalls usually only take care of external threats);
+    If you want to implement an extra security layer in your network, in addition to the one provided by institutional firewalls and gateways;
+
+
+
 Foreword
 ========
 
